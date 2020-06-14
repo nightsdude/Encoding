@@ -12,10 +12,11 @@ using namespace std;
  * Implementation of hamming codes.
  */
 class HammingCode {
-    public:
+    private:
     bitset<B> bits;
     int size;
-
+    
+    public:
     HammingCode() {
         this->size = 0;
     }
@@ -41,29 +42,6 @@ class HammingCode {
     }
 
     /**
-     * Finds the correct hamming code - the code with the lowest hamming distance.
-     */
-    HammingCode findCorrectCode(HammingCode hammingCodes[], int codesLength) {
-        int distance = INT_MAX;
-        for (int i = 0; i < codesLength; i++) 
-            for (int j = i + 1; j < codesLength; j++) {
-                int hammingDiff = hammingCodes[i].hammingDistance(hammingCodes[j]);
-                if (hammingDiff < distance) {
-                    distance = hammingDiff;
-                }
-            }
-
-        for (int i = 0; i < codesLength; i++) {
-            int hammingDiff = this->hammingDistance(hammingCodes[i]);
-                if (hammingDiff <= (distance - 1) / 2) {
-                    return hammingCodes[i];
-                }
-        }
-
-        return HammingCode();
-    }
-
-    /**
      * Checks if object is unpopulated.
      */ 
     bool isEmpty() {
@@ -82,10 +60,10 @@ class HammingCode {
 
         for (int i = 0; i < B; i++) {
             if(bits[i]) {
-                bitChars[i] = '1';
+                bitChars[B - i - 1] = '1'; // bitset uses the other endian
             }
             else {
-                bitChars[i] = '0';
+                bitChars[B - i - 1] = '0'; // bitset uses the other endian
             }
         }
 
@@ -93,11 +71,75 @@ class HammingCode {
     }
 };
 
+/**
+ * Container for HammingCode objects.
+ */
+class HammingCodes {
+    private:
+        HammingCode hammingCodes[10000];
+        int size;
+        int distance;
+
+
+    public:
+
+    /**
+     * Placeholder constructor.
+     * Used as a null.
+     */
+    HammingCodes() {
+        this->size = 0;
+        this->distance = 0;
+    }
+
+    /**
+     * Constructs the immutable object.
+     * It calculates the minimal hamming distance btw any of the codes and stores it for later code error detection and correction. 
+     */
+    HammingCodes(string codes[], int codesLength) {
+        for(int i = 0; i < codesLength; i++) {
+            hammingCodes[i] = codes[i];
+        }
+
+        this->size = codesLength;
+
+        int distance = INT_MAX;
+        for (int i = 0; i < this->size; i++) 
+            for (int j = i + 1; j < this->size; j++) {
+                int hammingDiff = this->hammingCodes[i].hammingDistance(this->hammingCodes[j]);
+                if (hammingDiff < distance) {
+                    distance = hammingDiff;
+                }
+            }
+
+        this->distance = distance;
+    }
+
+    /**
+     * Finds the correct hamming code - the code with the lowest hamming distance.
+     */
+    HammingCode findCorrectCode(HammingCode code) {
+        int correctionDist = (this->distance - 1) / 2;
+        
+        for (int i = 0; i < this->size; i++) {
+            int hammingDiff = code.hammingDistance(hammingCodes[i]);
+                if (hammingDiff <= correctionDist) {
+                    return hammingCodes[i];
+                }
+        }
+
+        return HammingCode();
+    }
+
+};
+
 // Reads the hamming codes and the code supplied for error correction.
 // USAGE: HammingCode hammingCodes 00000001
 int main(int argc,char* argv[]) {
     string line;
-    HammingCode hammingCodes[10000];
+    
+    string codes[10000];
+    HammingCodes hammingCodes;
 
     if (argc < 3) {
         cout << "Command line arguments missing." << endl;
@@ -112,10 +154,12 @@ int main(int argc,char* argv[]) {
         while (!file.eof()) 
         {
             getline(file, line);
-            hammingCodes[codesLength] = HammingCode(line);
+            codes[codesLength] = line;
             cout << line << endl;
             codesLength++;
         }
+
+        hammingCodes = HammingCodes(codes, codesLength);
     }
     else {
         cout << "File " << argv[1] << "does not exist." << endl;
@@ -124,7 +168,7 @@ int main(int argc,char* argv[]) {
 
     HammingCode input = HammingCode(argv[2]);
 
-    HammingCode correctCode = input.findCorrectCode(hammingCodes, codesLength);
+    HammingCode correctCode = hammingCodes.findCorrectCode(input);
 
     if (correctCode.isEmpty()) {
         cout << "The error may not be corrected." << endl;
