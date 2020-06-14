@@ -2,38 +2,40 @@
 #include <string>
 #include <fstream>
 #include <climits>
+#include <bitset> 
 
 using namespace std;
+
+#define B 8
 
 /** 
  * Conceptual implementation of hamming codes.
  */
 class HammingCode {
     public:
-    string code;
-    int length;
+    bitset<B> bits;
+    int size;
 
-    HammingCode() {}
+    HammingCode() {
+        this->size = 0;
+    }
 
     HammingCode(string code) {
-        this->code = string(code); 
-        this->length = code.length();
+        this->bits = bitset<B>(code);
+        this->size = B; 
     }
 
     /**
      * Calculates hamming distance between 2 conceptual hamming codes.
      */
     int hammingDistance(HammingCode code) {
-        int comparisonLength = min(this->length, code.length);
         int hammingDifference = 0;
 
-        for (int i = 0; i < comparisonLength; i++) {
-            if (this->code.at(i) != code.code.at(i)) {
+        for (int i = 0; i < B; i++) {
+            if (this->bits[i] != code.bits[i]) {
                 hammingDifference++;
             }    
         }
-
-        hammingDifference += max(this->length, code.length) - comparisonLength;
 
         return hammingDifference;
     }
@@ -65,7 +67,7 @@ class HammingCode {
      * Checks if object is uninitialized - its fields are default values.
      */ 
     bool isEmpty() {
-        if (this->code.empty()) {
+        if (this->size == 0) {
             return true;
         }
 
@@ -76,11 +78,23 @@ class HammingCode {
      * Returns string representation of the hamming code.
      */
     string toString() {
-        return this->code;
+        char bitChars[B];
+
+        for (int i = 0; i < B; i++) {
+            if(bits[i]) {
+                bitChars[i] = '1';
+            }
+            else {
+                bitChars[i] = '0';
+            }
+        }
+
+        return string(bitChars);
     }
 };
 
 // Reads the hamming codes and the code supplied for error correction.
+// USAGE: HammingCode hammingCodes 00000001
 int main(int argc,char* argv[]) {
     string line;
     HammingCode hammingCodes[10000];
@@ -118,7 +132,7 @@ int main(int argc,char* argv[]) {
     }
 
     if(input.hammingDistance(correctCode) == 0) {
-        cout << "The code is correct - there is no error." << endl;
+        cout << "The code is correct." << endl;
         return 0;
     }
 
