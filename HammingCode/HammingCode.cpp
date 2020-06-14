@@ -9,7 +9,7 @@ using namespace std;
 #define B 8
 
 /** 
- * Conceptual implementation of hamming codes.
+ * Implementation of hamming codes.
  */
 class HammingCode {
     public:
@@ -26,7 +26,7 @@ class HammingCode {
     }
 
     /**
-     * Calculates hamming distance between 2 conceptual hamming codes.
+     * Calculates hamming distance between 2 hamming codes.
      */
     int hammingDistance(HammingCode code) {
         int hammingDifference = 0;
@@ -41,7 +41,7 @@ class HammingCode {
     }
 
     /**
-     * Finds the correct conceptual hamming code - the code with the lowest hamming distance.
+     * Finds the correct hamming code - the code with the lowest hamming distance.
      */
     HammingCode findCorrectCode(HammingCode hammingCodes[], int codesLength) {
         int distance = INT_MAX;
@@ -64,7 +64,7 @@ class HammingCode {
     }
 
     /**
-     * Checks if object is uninitialized - its fields are default values.
+     * Checks if object is unpopulated.
      */ 
     bool isEmpty() {
         if (this->size == 0) {
